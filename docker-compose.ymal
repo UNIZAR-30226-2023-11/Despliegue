@@ -1,0 +1,87 @@
+version: '3.8'
+services:
+  mongodb:
+    # build: 
+      # context: ./MongoDB
+      # dockerfile: Dockerfile
+    restart: always
+    networks:
+      - mongo-back
+    image: mongo:4.4.3
+    container_name: mongodb_docker
+    volumes:
+      - ./MongoDB/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./MongoDB/collections:/tmp/collections
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: toor
+      MONGO_INITDB_DATABASE: Monopoly
+      # MONGO_URI: mongodb://root:toor@mongodb:27017/Monopoly
+
+  app-backend:
+    build: 
+      context: ./Back-End
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - mongo-back
+      # - back-web
+    container_name: backend_docker
+    volumes:
+      - app-backend_data_docker:/home/usuario/app
+    ports:
+      - "80:80"
+    depends_on:
+      - mongodb
+
+  # web-app-frontend:
+  #   build: 
+  #     context: ./Web-Front-End
+  #     dockerfile: Dockerfile
+  #   # restart: always
+  #   networks:
+  #     - back-web
+  #   # image: angular/ngcontainer:latest
+  #   container_name: web_frontend_docker
+  #   volumes:
+  #     -   app-frontend_web_data_docker:/home/usuario/app
+  #   ports:
+  #     - "4200:4200"
+  #   depends_on: 
+  #     - app-backend
+
+  # movil-app-frontend:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.movil
+  #   restart: always
+  #   container_name: movil_frontend_docker
+  #   volumes:
+  #     - app-frontend_movil_data_docker:/home/usuario/app
+  #   ports:
+  #     - "3000:3000"
+
+networks:
+  mongo-back:
+  # back-web:
+
+volumes:
+  app-backend_data_docker:
+    driver_opts:
+      type: 'none'
+      device: '/home/dani/Monopoly/Back-End/app_server_websocket'
+      o: 'bind'
+    
+  # app-frontend_movil_data_docker:
+  #   driver_opts:
+  #     type: 'none'
+  #     device: '/home/dani/Monopoly/Movil-Front-End'
+  #     o: 'bind'
+  
+  # app-frontend_web_data_docker:
+  #   driver_opts:
+  #     type: 'none'
+  #     device: '/home/dani/Monopoly/Web-Front-End/'
+  #     o: 'bind'
